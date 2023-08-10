@@ -1,5 +1,14 @@
-👋 Hi there 👋
-🌱 I’m currently learning javascript
+👋 Hey there! Welcome to my GitHub profile! 👋
+
+🌱 I'm on an exciting journey of learning and building with Python, JavaScript, Django, React, HTML, CSS, and full-stack web applications. 🚀
+
+🔭 Currently, I'm honing my skills and working on various projects to create awesome web experiences.
+
+💬 Feel free to reach out if you'd like to connect, collaborate, or chat about anything related to programming and web development.
+
+📫 You can find me at tylermkendall@gmail.com or check out my Portfolio Website: WIP.
+
+Let's code and create together! 😄🚀⚡
 <!--
 **ItsEze/ItsEze** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
