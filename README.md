@@ -1,6 +1,6 @@
 👋 Hey there! Welcome to my GitHub profile! 👋
 
-🌱 I'm on an exciting journey of learning and building with Python, JavaScript, Django, React, HTML, CSS, and full-stack web applications. 🚀
+🌱 I'm on an exciting journey of learning and building full-stack web applications with Python, JavaScript, Django, React, HTML, CSS. 🚀
 
 🔭 Currently, I'm honing my skills and working on various projects to create awesome web experiences.
 
