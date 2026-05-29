@@ -57,8 +57,8 @@ function onOpen() {
 
 function buildWindroseTracker() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  TABS.forEach(function (t) { buildTab_(ss, t); });  // tabs first, so Dashboard cross-sheet formulas resolve
   buildDashboard_(ss);
-  TABS.forEach(function (t) { buildTab_(ss, t); });
   buildHowTo_(ss);
   const order = ['Dashboard'].concat(TABS.map(function (t) { return t.name; })).concat(['How to use']);
   orderSheets_(ss, order);
