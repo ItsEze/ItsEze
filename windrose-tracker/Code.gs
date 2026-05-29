@@ -104,12 +104,16 @@ function orderSheets_(ss, order) {
 }
 
 function removeDefault_(ss) {
+  // blank default sheet
   ['Sheet1', 'Sheet 1'].forEach(function (n) {
     const s = ss.getSheetByName(n);
     if (s && s.getLastRow() === 0 && ss.getSheets().length > 1) {
       try { ss.deleteSheet(s); } catch (e) {}
     }
   });
+  // legacy single-tab "Recipes" sheet from an earlier version (now split into category tabs)
+  const old = ss.getSheetByName('Recipes');
+  if (old && ss.getSheets().length > 1) { try { ss.deleteSheet(old); } catch (e) {} }
 }
 
 /* ---- a category tab ---- */
