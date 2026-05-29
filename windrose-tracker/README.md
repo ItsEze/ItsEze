@@ -4,9 +4,15 @@ A shared, color-coded **Google Sheet** for the crew (**Eze · Cowy · Nick · Ch
 which Windrose recipes each of you has unlocked — so nobody wastes coin or a single-use
 **Recipe Paper** on something a crewmate can already copy to you.
 
-Built from the community **WindrosePlus** catalogue snapshot: **331 craftable recipes**, each
-with its real in-game icon, rarity, crafting station, ingredients, and (where it applies) the
-merchant that sells it.
+Built from the community **WindrosePlus** catalogue: **167 shareable gear recipes** — armour,
+weapons & jewellery — each with its real in-game icon, rarity, crafting station, ingredients,
+and (where it applies) the merchant that sells it.
+
+> **Why only gear?** The tracker deliberately holds only recipes worth coordinating: ones you
+> *deliberately unlock* and can *hand a copy of* to a crewmate. **Food & potions** auto-unlock
+> the moment you pick up their ingredients, and **ships** can't be handed over — so those, plus
+> refined materials and buildables, are intentionally left out. (The full 331-recipe set lives in
+> this repo's git history if you ever want it back.)
 
 ---
 
@@ -28,7 +34,7 @@ live in the sheet, so rebuilding never wipes them.
 
 | Tab | What it does |
 |-----|--------------|
-| **Dashboard** | Live scoreboard — recipes known per crew member, % complete, a Category × crew matrix, and how many recipes nobody has yet. |
+| **Dashboard** | Live scoreboard — recipes known per crew member, % complete, a Type × crew matrix (Armor / Ring / Necklace / Backpack / Melee / Range / Tool / Ammo), and how many recipes nobody has yet. |
 | **Recipes** | One row per recipe: icon, name, category, type, rarity (color-coded), unlock, station, ingredients, merchant, a checkbox for each of the 4 of you, **Owned** count, and **Who has it**. Every column filters. |
 | **How to use** | The day-to-day workflow, in the sheet itself. |
 
