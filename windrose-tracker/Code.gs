@@ -51,8 +51,59 @@ const DATA = [{"name":"Chicha morada","category":"Consumables","type":"Food","ra
 /* ------------------------------------------------------------------ */
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('🧭 Windrose')
+    .addItem('Import my recipes (paste save code)', 'importMyRecipes')
+    .addSeparator()
     .addItem('Build / Rebuild tracker', 'buildWindroseTracker')
     .addToUi();
+}
+
+/* ---- import unlocked recipes from a windrose_sync.py code (additive) ---- */
+function importMyRecipes() {
+  const ui = SpreadsheetApp.getUi();
+  const r1 = ui.prompt('🧭 Import from save',
+    'Paste the SYNC CODE from windrose_sync.py:', ui.ButtonSet.OK_CANCEL);
+  if (r1.getSelectedButton() !== ui.Button.OK) return;
+  let names;
+  try {
+    const json = Utilities.newBlob(Utilities.base64Decode(r1.getResponseText().trim()))
+                          .getDataAsString('UTF-8');
+    names = (JSON.parse(json).recipes) || [];
+    if (!names.length) throw new Error('empty');
+  } catch (e) {
+    ui.alert('Could not read that code', 'Paste the entire SYNC CODE line and try again.', ui.ButtonSet.OK);
+    return;
+  }
+  const r2 = ui.prompt('🧭 Whose recipes are these?',
+    'Type one of:  ' + PLAYERS.join(' · '), ui.ButtonSet.OK_CANCEL);
+  if (r2.getSelectedButton() !== ui.Button.OK) return;
+  const player = r2.getResponseText().trim();
+  const pIdx = PLAYERS.indexOf(player);
+  if (pIdx < 0) { ui.alert('Unknown name', '"' + player + '" must be exactly one of:  ' + PLAYERS.join(', '), ui.ButtonSet.OK); return; }
+
+  const want = {}; names.forEach(function (n) { want[String(n)] = true; });
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let ticked = 0, already = 0; const found = {};
+  TABS.filter(function (t) { return t.track; }).forEach(function (t) {
+    const sh = ss.getSheetByName(t.name);
+    if (!sh) return;
+    const n = sh.getLastRow() - 1;
+    if (n < 1) return;
+    const nm = sh.getRange(2, 2, n, 1).getValues();           // Recipe names (col B)
+    const col = T_PLAYER0 + pIdx;                             // this player's checkbox column
+    const cur = sh.getRange(2, col, n, 1).getValues();        // existing ticks (kept)
+    for (let i = 0; i < n; i++) {
+      if (want[nm[i][0]]) {
+        found[nm[i][0]] = true;
+        if (cur[i][0] === true) already++; else { cur[i][0] = true; ticked++; }
+      }
+    }
+    sh.getRange(2, col, n, 1).setValues(cur);                 // additive: only FALSE->TRUE
+  });
+  const notFound = names.filter(function (x) { return !found[x]; }).length;
+  ui.alert('🧭 Imported for ' + player,
+    'Newly ticked: ' + ticked + '\nAlready had: ' + already +
+    (notFound ? '\nIn your save but not a tracked gear recipe: ' + notFound : '') +
+    '\n\nExisting checkmarks were left untouched.', ui.ButtonSet.OK);
 }
 
 function buildWindroseTracker() {
