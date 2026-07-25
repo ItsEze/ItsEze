@@ -51,59 +51,8 @@ const DATA = [{"name":"Chicha morada","category":"Consumables","type":"Food","ra
 /* ------------------------------------------------------------------ */
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('🧭 Windrose')
-    .addItem('Import my recipes (paste save code)', 'importMyRecipes')
-    .addSeparator()
     .addItem('Build / Rebuild tracker', 'buildWindroseTracker')
     .addToUi();
-}
-
-/* ---- import unlocked recipes from a windrose_sync.py code (additive) ---- */
-function importMyRecipes() {
-  const ui = SpreadsheetApp.getUi();
-  const r1 = ui.prompt('🧭 Import from save',
-    'Paste the SYNC CODE from windrose_sync.py:', ui.ButtonSet.OK_CANCEL);
-  if (r1.getSelectedButton() !== ui.Button.OK) return;
-  let names;
-  try {
-    const json = Utilities.newBlob(Utilities.base64Decode(r1.getResponseText().trim()))
-                          .getDataAsString('UTF-8');
-    names = (JSON.parse(json).recipes) || [];
-    if (!names.length) throw new Error('empty');
-  } catch (e) {
-    ui.alert('Could not read that code', 'Paste the entire SYNC CODE line and try again.', ui.ButtonSet.OK);
-    return;
-  }
-  const r2 = ui.prompt('🧭 Whose recipes are these?',
-    'Type one of:  ' + PLAYERS.join(' · '), ui.ButtonSet.OK_CANCEL);
-  if (r2.getSelectedButton() !== ui.Button.OK) return;
-  const player = r2.getResponseText().trim();
-  const pIdx = PLAYERS.indexOf(player);
-  if (pIdx < 0) { ui.alert('Unknown name', '"' + player + '" must be exactly one of:  ' + PLAYERS.join(', '), ui.ButtonSet.OK); return; }
-
-  const want = {}; names.forEach(function (n) { want[String(n)] = true; });
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let ticked = 0, already = 0; const found = {};
-  TABS.filter(function (t) { return t.track; }).forEach(function (t) {
-    const sh = ss.getSheetByName(t.name);
-    if (!sh) return;
-    const n = sh.getLastRow() - 1;
-    if (n < 1) return;
-    const nm = sh.getRange(2, 2, n, 1).getValues();           // Recipe names (col B)
-    const col = T_PLAYER0 + pIdx;                             // this player's checkbox column
-    const cur = sh.getRange(2, col, n, 1).getValues();        // existing ticks (kept)
-    for (let i = 0; i < n; i++) {
-      if (want[nm[i][0]]) {
-        found[nm[i][0]] = true;
-        if (cur[i][0] === true) already++; else { cur[i][0] = true; ticked++; }
-      }
-    }
-    sh.getRange(2, col, n, 1).setValues(cur);                 // additive: only FALSE->TRUE
-  });
-  const notFound = names.filter(function (x) { return !found[x]; }).length;
-  ui.alert('🧭 Imported for ' + player,
-    'Newly ticked: ' + ticked + '\nAlready had: ' + already +
-    (notFound ? '\nIn your save but not a tracked gear recipe: ' + notFound : '') +
-    '\n\nExisting checkmarks were left untouched.', ui.ButtonSet.OK);
 }
 
 function buildWindroseTracker() {
@@ -169,6 +118,7 @@ function removeDefault_(ss) {
 
 /* ---- a category tab ---- */
 function buildTab_(ss, tab) {
+  const keep = tab.track ? snapshotTicks_(ss, tab.name) : null;   // preserve crew ticks across rebuilds
   const sh = freshSheet_(ss, tab.name);
   const track = !!tab.track;
   const HEAD = track ? T_HEAD : R_HEAD;
@@ -252,6 +202,34 @@ function buildTab_(ss, tab) {
   sh.setConditionalFormatRules(rules);
 
   sh.getRange(1, 1, nRows + 1, nCols).createFilter();
+  if (keep) restoreTicks_(sh, keep);
+}
+
+/* ---- preserve crew checkmarks across a rebuild (matched by recipe name) ---- */
+function snapshotTicks_(ss, name) {
+  const sh = ss.getSheetByName(name);
+  if (!sh) return null;
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return null;
+  const hdr = sh.getRange(1, T_PLAYER0, 1, PLAYERS.length).getValues()[0];
+  if (hdr.join(',') !== PLAYERS.join(',')) return null;         // unexpected layout -> leave it alone
+  const names = sh.getRange(2, 2, n, 1).getValues();
+  const checks = sh.getRange(2, T_PLAYER0, n, PLAYERS.length).getValues();
+  const map = {};
+  for (let i = 0; i < n; i++) if (names[i][0]) map[names[i][0]] = checks[i];
+  return map;
+}
+
+function restoreTicks_(sh, map) {
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return;
+  const names = sh.getRange(2, 2, n, 1).getValues();
+  const out = []; let any = false;
+  for (let i = 0; i < n; i++) {
+    const prev = map[names[i][0]];
+    if (prev) { out.push(prev); any = true; } else { out.push(new Array(PLAYERS.length).fill(false)); }
+  }
+  if (any) sh.getRange(2, T_PLAYER0, n, PLAYERS.length).setValues(out);
 }
 
 /* ---- Dashboard ---- */

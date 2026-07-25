@@ -55,14 +55,6 @@ A **🧭 Windrose** menu appears after the first run — rebuild any time; your 
 
 ---
 
-## 🔄 Auto-fill from your save (optional)
-Don't want to tick boxes by hand? Run **[`sync/windrose_sync.py`](./sync/)** after a play session —
-it reads your local Windrose save, finds which gear recipes you've unlocked, and prints a code.
-Paste it via **🧭 Windrose ▸ Import my recipes**, pick your name, and your column fills itself in
-(additively — it never removes anyone's existing ticks). Full steps in [`sync/README.md`](./sync/README.md).
-
----
-
 ## 🛠️ Extend it
 - Add rows at the bottom of any tab — fill the columns and tick boxes as usual.
 - Want a picture on a custom row? Drop `=IMAGE("https://…")` into its Icon cell.
